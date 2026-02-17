@@ -1,0 +1,4 @@
+Host_prediction_to_genome_m90-combined.csv filter=lfs diff=lfs merge=lfs -text
+protein_clusters.tsv filter=lfs diff=lfs merge=lfs -text
+annotations/kofam-output.txt filter=lfs diff=lfs merge=lfs -text
+phage-coverage-combined.filt.tsv filter=lfs diff=lfs merge=lfs -text
