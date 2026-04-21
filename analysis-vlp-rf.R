@@ -7,7 +7,7 @@ library(pheatmap)
 library(ComplexHeatmap)
 library(circlize)
 
-phage_metadata <- phage_metadata <- read_tsv("metadata.tsv")
+phage_metadata <- read_tsv("metadata.tsv")
 rownames(phage_metadata) <- phage_metadata$run
 
 rf.otutable.phage <- as.data.frame(t(otu_table(ps.phage.relabund)))
@@ -24,6 +24,8 @@ names(rf.otutable.phage) <- gsub(x = names(rf.otutable.phage), pattern = "\\|", 
 
 #saveRDS(rf.otutable.phage, "rds/rf.otutable.phage.phf.rds")
 # rf.otutable.phage <- readRDS("rds/rf.otutable.phage.phf.rds")
+# rf.otutable.phage$age_months <- floor(rf.otutable.phage$age_days/30)
+# rf.otutable.phage <- rf.otutable.phage %>% select(-age_days)
 
 set.seed(123)
 trainIndex <- createDataPartition(rf.otutable.phage$age_months, p = 0.7,
@@ -140,7 +142,7 @@ important.taxa.r2 <- trainData %>%
   pivot_longer(cols = -age_months, names_to = "phf", values_to = "relabund") %>% 
   select(phf, relabund, age_months) %>% 
   group_by(phf) %>% 
-  summarize(cor = sign(cor(relabund, age_months)),
+  dplyr::summarize(cor = sign(cor(relabund, age_months)),
             r2 = cor(relabund, age_months)^2,
             sign_r2 = r2*cor)
 
@@ -157,13 +159,14 @@ all_colors <- c(neg_colors, rev(pos_colors))
 
 ### HEATMAP ###
 # ps.phage.relabund.phf <- readRDS("rds/ps.phage.relabund.phf.rds")
+
 ps.phage.relabund.phf.summary <- ps.phage.relabund.phf %>% 
   psmelt() %>%              
   filter(Abundance > 0) %>% 
   filter(family %in% (important.taxa %>%
                         top_n(20, IncNodePurity))$family) %>%
   group_by(Sample, family) %>% 
-  summarise(study = study, Abundance = sum(Abundance), age_months = age_months) %>% 
+  dplyr::summarise(study = study, Abundance = sum(Abundance), age_months = floor(age_days / 30)) %>% 
   distinct() %>% 
   ungroup()
 
@@ -176,7 +179,7 @@ ps.phage.relabund.phf.summary$age_bin <- ifelse(
 heatmap <- ps.phage.relabund.phf.summary %>% 
   group_by(age_bin, family) %>% 
   filter(age_months <= 36) %>% 
-  summarise(mean = mean(Abundance), age_bin = age_bin) %>% 
+  dplyr::summarise(mean = mean(Abundance), age_bin = age_bin) %>% 
   distinct() %>% 
   pivot_wider(values_from = mean, names_from = age_bin) %>% 
   as.data.frame()
