@@ -8,7 +8,7 @@ library(reshape2)
 ### VIROME DEVELOPMENTAL VELOCITY (PHF) ###
 phage_metadata <- readRDS("rds/metadata.combined.subset.rds") %>% mutate(age_months = floor(age_days/30))
 dist.phf.wuni <- readRDS("rds/dist.phf.wuni.rds")
-# dist.phf.bray <- readRDS("rds/dist.phf.bray.rds")
+dist.bray <- readRDS("rds/dist.bray.rds")
 
 dist.phf.wuni.melt <- dist.phf.wuni %>% 
   as.matrix() %>% 
@@ -30,32 +30,71 @@ dist.phf.wuni.melt <- dist.phf.wuni %>%
          study  = study.sample1) %>%
   select(dist, dT, vel, study, mean_log_depth, subjectID = subjectID.sample1, age_months.sample2, delivery_mode = delivery_mode.sample1, sex = sex.sample1)
 
-model.velocity.gam <- gam(vel ~ s(age_months.sample2) + mean_log_depth + 
+dist.bray.melt <- dist.bray %>% 
+  as.matrix() %>% 
+  melt() %>% 
+  `colnames<-`(c("sample1", "sample2", "dist")) %>% 
+  filter(!(sample1 == sample2)) %>% 
+  left_join(phage_metadata %>% select(run, age_months, study, subjectID, depth, delivery_mode, sex), by = c("sample1" = "run")) %>% 
+  left_join(phage_metadata %>% select(run, age_months, study, subjectID, depth, delivery_mode, sex), by = c("sample2" = "run"), suffix = c(".sample1", ".sample2")) %>% 
+  filter(study.sample1 %in% c("Lim2015", "Zhao2017", "Liang2020a", "Beller2022", "Walters2023", "Garmaeva2024")) %>%
+  filter(study.sample2 %in% c("Lim2015", "Zhao2017", "Liang2020a", "Beller2022", "Walters2023", "Garmaeva2024")) %>% 
+  filter(subjectID.sample1 == subjectID.sample2) %>% 
+  filter(age_months.sample1 < age_months.sample2) %>% 
+  group_by(sample1) %>% 
+  filter(age_months.sample2 == min(age_months.sample2)) %>%
+  ungroup() %>% 
+  mutate(dT = age_months.sample2 - age_months.sample1,
+         vel = dist / dT,
+         mean_log_depth = (log10(depth.sample1) + log10(depth.sample2))/2,
+         study  = study.sample1) %>%
+  select(dist, dT, vel, study, mean_log_depth, subjectID = subjectID.sample1, age_months.sample2, delivery_mode = delivery_mode.sample1, sex = sex.sample1)
+
+model.velocity.gam.phf <- gam(vel ~ s(age_months.sample2) + mean_log_depth + 
                                s(age_months.sample2, study, bs = "fs", m = 1) + s(subjectID, bs = "re"),
                              family = tw(),
                              method = "REML",
                              data = dist.phf.wuni.melt)
+summary(model.velocity.gam.phf)
+gam.check(model.velocity.gam.phf)
 
-summary(model.velocity.gam)
-gam.check(model.velocity.gam)
+model.velocity.gam.votu <- gam(vel ~ s(age_months.sample2) + mean_log_depth + 
+                                s(age_months.sample2, study, bs = "fs", m = 1) + s(subjectID, bs = "re"),
+                              family = tw(),
+                              method = "REML",
+                              data = dist.bray.melt)
+summary(model.velocity.gam.votu)
+gam.check(model.velocity.gam.votu)
 
-velocity.plot <- model.velocity.gam %>% 
+saveRDS(model.velocity.gam.phf, "rds/model.velocity.gam.phf.rds")
+saveRDS(model.velocity.gam.votu, "rds/model.velocity.gam.votu.rds")
+
+velocity.plot <- model.velocity.gam.phf %>% 
   smooth_estimates() %>% 
   add_confint() %>% 
+  mutate(dataset = "phf") %>% 
+  rbind(model.velocity.gam.votu %>% 
+          smooth_estimates() %>% add_confint() %>% 
+          mutate(dataset = "votu")) %>% 
   mutate(metric = "velocity") %>% 
   filter(.smooth == "s(age_months.sample2)") %>% 
-  ggplot(aes(x = age_months.sample2, y = .estimate, colour = metric)) +
+  ggplot(aes(x = age_months.sample2, y = .estimate, colour = dataset)) +
   geom_line(linewidth = 1) +
-  geom_ribbon(aes(ymin = .lower_ci, ymax = .upper_ci, fill = metric), linewidth = 0.1, alpha = 0.1) +
-  scale_colour_manual(values = c("#F89C74FF")) +
-  scale_fill_manual(values = c("#F89C74FF")) +
+  geom_ribbon(aes(ymin = .lower_ci, ymax = .upper_ci, fill = dataset), linewidth = 0.1, alpha = 0.1) +
+  scale_colour_manual(values = c("#F89C74FF", "#B497E7FF"), labels = c("PHF\n(p<0.001)","vOTU\n(p<0.001)")) +
+  scale_fill_manual(values = c("#F89C74FF", "#B497E7FF"), labels = c("PHF\n(p<0.001)","vOTU\n(p<0.001)")) +
   theme_bw() + 
   labs(title = "Virome developmental velocity",
        x = "Age (months)",
        y = "Partial effect") +
   theme(aspect.ratio = 0.5,
         legend.title = element_blank(),
-        legend.position = "none") +
+        legend.key.spacing.y = unit(0.15, 'cm'),
+        legend.position = "inside",
+        legend.position.inside = c(0.23, 0.12) ,
+        legend.box.background = element_rect(color = "black")
+  ) +
+  guides(colour = guide_legend(nrow = 1)) +
   scale_x_continuous(breaks = seq(0, 36, by = 6))
 
 velocity.plot
