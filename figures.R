@@ -39,11 +39,11 @@ plot.donut.participants <-
   ggplot(aes(ymax = participants.ymax, ymin = participants.ymin, xmax = 4, xmin = 3, fill = study)) +
   geom_rect(color = "white", linewidth = 0.5) +
   geom_text(aes(x = participants.labelposition.x, y = participants.labelposition.y, label = participants, color = study, fontface="bold"), size = 4) +
-  annotate("text", x = 1, y = 0, label = "Participants", size = 5, fontface = "bold") +
+  annotate("text", x = 0, y = 0, label = "Participants\n(n=999)", size = 5, fontface = "bold") +
   paletteer::scale_colour_paletteer_d("ggthemes::Classic_Green_Orange_12") +
   paletteer::scale_fill_paletteer_d("ggthemes::Classic_Green_Orange_12") +
   coord_polar(theta = "y") +
-  xlim(c(1, 4.4)) +
+  #xlim(c(1, 4.4)) +
   theme_void() +
   theme(legend.position = "none")
 plot.donut.participants
@@ -60,11 +60,11 @@ plot.donut.samples <-
   ggplot(aes(ymax = samples.ymax, ymin = samples.ymin, xmax = 4, xmin = 3, fill = study)) +
   geom_rect(color = "white", linewidth = 0.5) +
   geom_text(aes(x = samples.labelposition.x, y = samples.labelposition.y, label = samples, color = study, fontface = "bold"), size = 4) +
-  annotate("text", x = 1, y = 0, label = "Samples", size = 5, fontface = "bold") +
+  annotate("text", x = 0, y = 0, label = "Samples\n(n=1,893)", size = 5, fontface = "bold") +
   paletteer::scale_colour_paletteer_d("ggthemes::Classic_Green_Orange_12") +
   paletteer::scale_fill_paletteer_d("ggthemes::Classic_Green_Orange_12") +
   coord_polar(theta = "y") +
-  xlim(c(1, 4.4)) +
+  #xlim(c(1, 4.4)) +
   theme_void() +
   theme(legend.position = "none")
 plot.donut.samples
@@ -159,6 +159,15 @@ save_plot("~/Desktop/Figure1.pdf", fig.1, dpi = 600, base_height = 10, base_widt
 
 
 #### FIGURE 2 ####
+addSmallLegend <- function(myPlot, pointSize = 2, textSize = 10, spaceLegend = 0.3) {
+  myPlot +
+    guides(shape = guide_legend(override.aes = list(size = pointSize)),
+           color = guide_legend(override.aes = list(size = pointSize))) +
+    theme(legend.title = element_text(size = textSize), 
+          legend.text  = element_text(size = textSize),
+          legend.key.size = unit(spaceLegend, "lines"))
+}
+
 fig.2a <- ggdraw() +
   draw_plot(prevalence.rank.plot) +
   draw_plot(addSmallLegend(top.prevalent.plot + theme(axis.text.x = element_text(angle = 45, vjust = 0.7)), pointSize = 2, textSize = 5, spaceLegend = 0.3), 
@@ -217,7 +226,7 @@ fig.3 <- plot_grid(
     ncol = 2,
     labels = c("A", "B"),
     label_size = 22,
-    rel_widths = c(0.95, 1)
+    rel_widths = c(0.97, 1)
   ),
   plot_grid(
     fig.3c, fig.3d, 
