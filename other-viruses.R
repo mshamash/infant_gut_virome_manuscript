@@ -72,7 +72,7 @@ other.virus.presence_absence.ordered <- other.virus.presence_absence[, samples.o
 host_groups <- c(
   # https://ictv.global/virus-properties
   
-  # Animal / Human
+  # Animal
   "Picornaviridae" = "Animal", "Astroviridae" = "Animal", "Anelloviridae" = "Animal", 
   "Caliciviridae" = "Animal", "Adenoviridae" = "Animal", "Parvoviridae" = "Animal",
   "Papillomaviridae" = "Animal", "Polyomaviridae" = "Animal", "Poxviridae" = "Animal", 
@@ -83,7 +83,7 @@ host_groups <- c(
   "Solemoviridae" = "Plant", "Geminiviridae" = "Plant", "Nanoviridae" = "Plant", 
   "Tombusviridae" = "Plant", "Virgaviridae" = "Plant", "Closteroviridae" = "Plant",
   
-  # Fungi / Protists / Algae
+  # Fungi/Protist
   "Totiviridae" = "Fungi/Protist", "Endornaviridae" = "Fungi/Protist", 
   "Mimiviridae" = "Fungi/Protist", "Phycodnaviridae" = "Fungi/Protist",
   "Genomoviridae" = "Fungi/Protist",
