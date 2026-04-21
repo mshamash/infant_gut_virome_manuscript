@@ -47,6 +47,16 @@ ps.phage.relabund <- transform_sample_counts(ps.phage, function(x) x / sum(x) )
 # ps.phage <- readRDS("rds/ps.phage.rds")
 # ps.phage.relabund <- readRDS("rds/ps.phage.relabund.rds")
 
+
+### 
+phage_metadata$run %>% length() # 1,893 samples total
+ps.phage %>% sample_data() %>% pull(run) %>% length() # 1,869 samples after 1X/70% coverage filter
+
+missing.samples <- setdiff(phage_metadata$run, ps.phage %>% sample_data() %>% pull(run))
+length(missing.samples) # 24 samples were filtered out
+
+phage_metadata %>% filter(run %in% missing.samples) %>% view()
+
 # PHF / PHAGE-HOST FAMILY / IPHOP IMPORT
 
 iphop_out <- read_csv("Host_prediction_to_genome_m90-combined.csv")
@@ -245,13 +255,13 @@ permanova.phf.wuni.infant
 
 
 permanova.table <- data.frame(
-  `Effect` = c("log10(depth)", "study", "age_months", "subjectID"),
+  `Effect` = c("Sequencing depth", "Study", "Age (months)", "Subject ID"),
   `R2` = c("0.009", "0.136", "0.001", "0.488"),
   `P.value` = c("0.988", "0.011 *", "0.032 *", "-"))
 
 permanova.flextable <- flextable(permanova.table) %>% 
   add_header_row(colwidths = c(3),
-                 values = c("Weighted UniFrac distance ~ log10(depth) + study + age_months")) %>% 
+                 values = c("Weighted UniFrac distance ~ sequencing_depth + study + age")) %>% 
   theme_vanilla() %>% 
   add_footer_lines("PERMANOVA (adonis2) with 999 permutations") %>% 
   autofit(add_w = 0.8) %>% 
@@ -279,7 +289,7 @@ model.pielou.gam <- gam(Pielou_squeezed ~ s(age_months) + log10(depth) +
                           method = "REML",
                           data = alpha.diversity.votu.squeezed)
 # saveRDS(model.pielou.gam, "rds/model.pielou.gam.minimal.rds")
-# model.pielou.gam <- readRDS("rds/model.pielou.gam.minimal.rds")
+model.pielou.gam <- readRDS("rds/model.pielou.gam.minimal.rds")
 
 summary(model.pielou.gam)
 plot(model.pielou.gam, pages=1, se=TRUE)
@@ -291,7 +301,7 @@ model.shannon.gam <- gam(Shannon ~ s(age_months) + log10(depth) + s(age_months, 
                           family = gaussian(),
                           method = "REML")
 # saveRDS(model.shannon.gam, "rds/model.shannon.gam.minimal.rds")
-# model.shannon.gam <- readRDS("rds/model.shannon.gam.minimal.rds")
+model.shannon.gam <- readRDS("rds/model.shannon.gam.minimal.rds")
 
 summary(model.shannon.gam)
 plot(model.shannon.gam, pages=1, se=TRUE)
@@ -304,7 +314,7 @@ model.richness.gam <- gam(Observed ~ s(age_months) + log10(depth) + s(age_months
                           family = nb(),
                           method = "REML")
 # saveRDS(model.richness.gam, "rds/model.richness.gam.minimal.rds")
-# model.richness.gam <- readRDS("rds/model.richness.gam.minimal.rds")
+model.richness.gam <- readRDS("rds/model.richness.gam.minimal.rds")
 
 summary(model.richness.gam)
 plot(model.richness.gam, pages=1, se=TRUE)
