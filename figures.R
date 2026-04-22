@@ -266,56 +266,30 @@ save_plot("~/Desktop/Figure4.pdf", fig.4, dpi = 600, base_height = 4, base_width
 #### FIGURE 5 ####
 ggsave("~/Desktop/Figure5.pdf", plot = enrichment.plot, width = 15, height = 20, limitsize = FALSE)
 
-#### TABLE S1 ####
-table.s1 <- data.frame(
-  `Study` = c("Lim2015", "Zhao2017", "McCann2018", "Maqsood2019", "Liang2020a", "Beller2022", "Walters2023", "Shah2023", "Garmaeva2024", "Pannaraj2018", "Yan2021", "Liang2020b"),
-  `Ref.` = c("23", "24", "25", "26", "11", "28", "29", "30", "22", "31", "32", "27"),
-  `Accession` = c("PRJNA284162", "PRJNA387903", "PRJNA385126", "PRJEB33578", "PRJNA524703", "PRJNA693793", "PRJNA916952", "PRJEB46943", "Not publicly available", "PRJNA427187", "PRJNA641593", "PRJNA524703"),
-  `Sampling location(s)` = c("United States", "Finland, Estonia", "Ireland", "United States", "United States", "Belgium", "United States", "Denmark", "Netherlands", "United States", "China", "United States"),
-  `Sampling period (months)` = c("0 - 24", "1 - 23", "12", "0", "0 - 4", "0 - 13", "0 - 38", "12", "1 - 12", "0", "12 - 36", "4 - 36"),
-  `Study design` = c("L", "L", "C", "C", "L", "L", "L", "C", "L", "C", "C", "C"),
-  `Number of participants` = c("8", "11", "20", "51", "143", "8", "51", "647", "29", "10", "10", "11"),
-  `Number of samples` = c("48", "106", "20", "51", "184", "304", "421", "647", "81", "10", "10", "11"),
-  check.names = F
-  )
 
-table.s1.flextable <- flextable(table.s1) %>% 
-  theme_vanilla() %>% 
-  width(j = 1, width = 1.0) %>%
-  width(j = 2, width = 0.4) %>%
-  width(j = 3, width = 1.2) %>%
-  width(j = 4, width = 1.5) %>%
-  width(j = 5, width = 1.0) %>%
-  width(j = 6:8, width = 0.8) %>%
-  add_footer_row(colwidths = c(5, 1, 1, 1),
-                 values = c("", "Total", "999", "1,893"))
+#### SUPP FIGURE 1 ####
+ggsave("~/Desktop/SuppFigure1.pdf", plot = diet.plot, width = 7, height = 4, limitsize = FALSE)
 
-table.s1.flextable
+#### SUPP FIGURE 2 ####
+save_plot("~/Desktop/SuppFigure2.pdf", richness.derivative.plot, dpi = 600, base_height = 4, base_width = 7)
 
-save_as_image(table.s1.flextable, "~/Desktop/TableS1.png", res = 600)
+#### SUPP FIGURE 4 ####
+fig.s4a <- rf.sliding.window.fig
 
+fig.s4b <- losocv.rmse.fig
 
-#### FIGURE S1 ####
-save_plot("~/Desktop/FigureS1.pdf", fig.s1, dpi = 600, base_height = 4, base_width = 7)
+fig.s4c <- losocv.preds.fig
 
-
-#### FIGURE S2 ####
-fig.s2a <- rf.sliding.window.fig
-
-fig.s2b <- losocv.rmse.fig
-
-fig.s2c <- losocv.preds.fig
-
-fig.s2 <- plot_grid(
+fig.s4 <- plot_grid(
   plot_grid(
-    fig.s2a, fig.s2b,
+    fig.s4a, fig.s4b,
     nrow = 2, 
     ncol = 1,
     labels = c("A", "B"),
     label_size = 22,
     rel_heights = c(1, 1)
   ),
-  fig.s2c,
+  fig.s4c,
   ncol = 2,
   nrow = 1,
   labels = c("", "C"),
@@ -323,11 +297,41 @@ fig.s2 <- plot_grid(
   rel_widths = c(0.7, 1)
 )
 
-fig.s2
+fig.s4
 
-save_plot("~/Desktop/FigureS2.pdf", fig.s2, dpi = 600, base_height = 6, base_width = 13)
+save_plot("~/Desktop/SuppFigure4.pdf", fig.s2, dpi = 600, base_height = 6, base_width = 13)
 
-#### FIGURE S3 ####
-pdf("~/Desktop/FigureS3.pdf", height = 4, width = 8)
+#### SUPP FIGURE 5 ####
+pdf("~/Desktop/SuppFigure5.pdf", height = 4, width = 8)
 draw(amg.heatmap)
 dev.off()
+
+#### SUPP FIGURE 6 ####
+fig.s6a <- ggdraw() + draw_image(image_read_pdf("~/Desktop/SuppFigure6A.pdf", density = 400))
+
+fig.s6b <- other.virus.abundance.plot
+
+fig.s6c <- animal_virus.delivery_mode.plot
+
+fig.s6 <- 
+  plot_grid(
+    fig.s6a,
+    plot_grid(
+      fig.s6b,
+      fig.s6c,
+      ncol = 2, 
+      nrow = 1, 
+      rel_widths = c(1, 1),
+      labels = c("B", "C"),
+      label_size = 22
+    ),
+    labels = c("A", ""),
+    label_size = 22,
+    ncol = 1,
+    nrow = 2,
+    rel_heights = c(1, 0.6)
+  )
+
+fig.s6
+
+ggsave("~/Desktop/SuppFigure6.pdf", plot = fig.s6, width = 10, height = 7, limitsize = FALSE)

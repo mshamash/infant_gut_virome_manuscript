@@ -358,7 +358,7 @@ gratia::derivatives(model.richness.gam, term = "s(age_months)") %>%
   summarise(first_month_negative = min(age_months))
 # 7.68 months is when lower CI crosses below 0, so roughly 8 months
 
-fig.s1 <- gratia::derivatives(model.richness.gam, term = "s(age_months)") %>%
+richness.derivative.plot <- gratia::derivatives(model.richness.gam, term = "s(age_months)") %>%
   ggplot(aes(x = age_months, y = .derivative)) +
   geom_line(linewidth = 1) +
   geom_ribbon(aes(ymin = .lower_ci, ymax = .upper_ci), linewidth = 0.1, alpha = 0.1) +
@@ -369,5 +369,5 @@ fig.s1 <- gratia::derivatives(model.richness.gam, term = "s(age_months)") %>%
   ylab("Derivative") +
   xlab("Age (months)")
 
-fig.s1
+richness.derivative.plot
 

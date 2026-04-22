@@ -19,7 +19,7 @@ colnames(other.virus.family.counts) <- c("family", "n")
 
 
 ps.phage.relabund <- readRDS("rds/ps.phage.relabund.rds")
-otu_table.melt <- otu_table(ps.phage.relabund) %>% melt() #%>% filter(value > 0)
+otu_table.melt <- otu_table(ps.phage.relabund) %>% melt()
 colnames(otu_table.melt) <- c("virus", "run", "relabund")
 
 otu_table.melt.filt <- 
@@ -28,7 +28,6 @@ otu_table.melt.filt <-
 
 # Presence / absence heatmap
 other.virus.presence_absence <- otu_table.melt.filt %>% 
-  #filter(relabund > 0) %>% 
   left_join(genomad.taxonomy.filt, by = c("virus" = "seq_name")) %>% 
   group_by(run, family) %>% 
   dplyr::summarize(fam.relabund = sum(relabund)) %>% 
@@ -130,7 +129,6 @@ other.virus.heatmap <-
         column_title_gp = gpar(fontsize = 10, fontface = "bold"),
         column_gap = unit(1, "mm"),
         top_annotation = age.strip,
-        #column_order = samples.ordered,
         
         # ROWS
         cluster_rows = T,
@@ -145,7 +143,6 @@ other.virus.heatmap <-
         row_title = "Virus family",
         row_names_side = "left",
         left_annotation = host_anno
-        #column_names_rot = 90,
         )
 
 ComplexHeatmap::draw(other.virus.heatmap)
@@ -225,8 +222,6 @@ other.virus.abundance.plot <-
        colour = "Host",
        fill = "Host") +
   theme(legend.position = "right") +
-  #legend.title = element_blank(),
-  #legend.position = "none") +
   scale_x_continuous(breaks = seq(0, 36, by = 6), limits = c(0,38))
 
 ### PLANT VIRUS ABUNDANCE AND DIET ###
@@ -356,40 +351,7 @@ animal_virus.delivery_mode.plot <-
        fill = "Delivery mode",
        color = "Delivery mode") +
   scale_x_continuous(breaks = seq(0, 36, by = 6), limits = c(0, 36)) +
-  theme(legend.position = "right")# +
-  #guides(col = guide_legend(nrow = 1), fill = guide_legend(nrow = 1))
-
-
-
-fig.s6a <- ggdraw() + draw_image(image_read_pdf("~/Desktop/SuppFigure6A.pdf", density = 400))
-
-fig.s6b <- other.virus.abundance.plot
-
-fig.s6c <- animal_virus.delivery_mode.plot
-
-fig.s6 <- 
-  plot_grid(
-    fig.s6a,
-    plot_grid(
-      fig.s6b,
-      fig.s6c,
-      ncol = 2, 
-      nrow = 1, 
-      rel_widths = c(1, 1),
-      labels = c("B", "C"),
-      label_size = 22
-    ),
-    labels = c("A", ""),
-    label_size = 22,
-    ncol = 1,
-    nrow = 2,
-    rel_heights = c(1, 0.6)
-  )
-
-fig.s6
-
-ggsave("~/Desktop/SuppFigure6.pdf", plot = fig.s6, width = 10, height = 7, limitsize = FALSE)
-
+  theme(legend.position = "right")
 
 ### NUMBER OF VIRUSES PER HOST CATEGORY ###
 genomad.taxonomy.filt %>% 
